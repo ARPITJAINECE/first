@@ -1,0 +1,648 @@
+prompt 233015_arpitjain d/
+
+
+
+
+select emono,ename,sal,e.deptno,d.deptno,dname from emp e right join dept d on e.deptno=d.deptno;
+
+select empno,ename,sal,e.deptno,d.deptno,dname from emp e left join dept d on e.deptno=d.deptno
+union
+select empno,ename,sal,e.deptno,d.deptno,dname from emp e right join dept d on e.deptno=d.deptno;
+
+
+select c.courseid,c.cname,r.rname,f.fname from course c inner join room r where c.rid=r.roomid
+
+
+create view mgr10
+as
+select * from emp where deptno=10;
+
+
+create table category(
+cid int primary key,
+cname varchar(30) not null,
+cdesc varchar(30));
+
+create table product(
+pid int primary key,
+pname varchar(20) not null unique,
+qty int check(qty>0) default 10,
+price double(9,2) check(price>0),
+catid int,
+foreign key fk_cid(catid) references category (cid)
+on delete set null
+on update cascade);
+
+
+					procedures
+					
+					
+delimiter //
+create procedure myproc()
+begin
+select * from emp;
+end //
+delimiter ;
+
+call myproc();
+
+
+delimiter //
+create procedure insrec(pid int,pname varchar(30),qty int,price double(9,2))
+begin
+insert into product (pid,pname,qty,price)values(pid,pname,qty,price);
+end //
+delimiter ;
+
+call insrec(1,'chips',50,35);
+
+
+delimiter //
+create procedure getdisc(in ppid int,out discamt double (9,2), out discper float(5,2))
+begin
+declare vprice int;
+select price into vprice from product
+where pid=ppid;
+if vprice < 20
+then set discper=0.03 and discamt=0.97;
+elseif vprice >=20 and vprice<40 then
+set discper=0.07 and discamt=vprice*0.93;
+else
+set discper=0.10 and discamt=vprice*0.90;
+end if;
+select discamt,discper;
+end //
+delimiter ;
+
+call getdisc(25,@a,@b);
+select @a,@b;
+
+
+					looping
+
+delimiter //
+create procedure facto(in n int)
+begin
+declare i,fa int default 1;
+while i<=n do
+set fa=fa*i;
+set i=i+1;
+end while;
+select fa;
+end //
+delimiter ;
+
+call facto(5);
+
+
+				cursor
+
+delimiter //
+create procedure dispemp()
+begin
+declare finished int default 0;
+declare vempno,vmgr,vdeptno int;
+declare vename,vjob varchar(30);
+declare vhiredate date;
+declare vsal,vcomm double(9,2);
+declare emp_cur cursor for select * from emp;
+declare continue handler for NOT FOUND set finished=1;
+open emp_cur;
+l1:loop 
+fetch emp_cur into vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+if finished=1 then
+leave l1;
+end if;
+select vempno,vename,vjob,vmgr,vsal,vcomm;
+end loop;
+close emp_cur;
+end //
+delimiter ;
+
+call dispemp();
+
+
+
+
+
+
+
+
+select empno,ename,hiredate,floor(datediff(curdate(),hiredate)/365) "exp"
+from emp;
+
+
+select empno,ename,deptno,job,concat(substr(ename,1,3),".",substr(job,1,3),"@mycompany.com") "email-id"
+from emp
+
+select * from emp where deptno=(select deptno from emp where ename='smith');
+
+
+select empno,ename,sal,comm,case
+when comm = null or comm = 0 then 'need improvement'
+when comm < 500 then 'ok'
+when comm >= 500 and comm < 100 then 'good'
+else 'excellent'
+end remarks
+from emp;
+
+
+select deptno,empno,ename,case
+when deptno=10 then 'sales'
+when deptno = 20 then 'purchase'
+when deptno = 30 then 'accounts'
+else 'marketing'
+end remarks
+from emp;
+
+
+create table room(
+rid int primary key,
+rname varchar(30),
+loc varchar(30));
+
+
+create table faculty(
+fid int primary key,
+fname varchar(30),
+skills varchar(30));
+
+
+create table category1(
+cid int primary key,
+cname varchar(30) not null,
+cdesc varchar(30));
+
+
+create table product1(
+pid int primary key,
+pname varchar(30) not null unique,
+qty int check(qty>0) default 10,
+price double(9,2) check(price>0),
+catid int);
+
+alter table product1
+add constraint fk_sid foreign key(catid) references category(cid);
+
+
+
+												end module practice (starting from procedure)
+												
+delimiter //
+create procedure myprc()
+begin
+select * from emp;
+end //
+delimiter ;
+
+call myproc();
+
+
+
+delimiter //
+create procedure insrec1(pid int,pname varchar(20), qty int,price double(9,2))
+begin
+insert into product(pid,pname,qty,price) values(pid,pname,qty,price);
+end //
+delimiter ;
+
+
+call insrec1(1080,'kurkure',50,55);
+
+
+
+delimiter //
+create procedure getCountByDept1(in pdno int,out count int)
+begin
+select count(*) into count from emp where deptno=pdno;
+end //
+delimiter ;
+
+call getCountByDept1(20,@c);
+select @c;
+
+
+
+delimiter //
+create procedure CountEmpAndMinSal(in pdno int,out count int,out minsal double(9,2))
+begin
+select count(*),min(sal) into count,minsal from emp where deptno=pdno;
+end //
+delimiter ;
+
+call CountEmpAndMinSal(20,@a,@b);
+select @a,@b;
+
+
+delimiter //
+create procedure CountByTen(inout count int)
+begin
+set count=count+10;
+end //
+delimiter ;
+
+
+set @c=10;
+call CountByTen(@c);
+select @c;
+
+
+
+delimiter //
+create procedure DispDeptSal(in pdno int,in salary int)
+begin
+select * from emp where deptno=pdno and sal>salary;
+end //
+delimiter ;
+
+call DispDeptSal(20,1500);
+
+
+
+												if-else statements
+
+delimiter //
+create procedure get_Remarks(in pempno int,out remarks varchar(15))
+begin
+declare vcomm int default 0;
+select comm into vcomm from emp where empno=pempno;
+if vcomm = null or vcomm = 0 then
+set remarks = 'need improvement';
+elseif vcomm < 300 then
+set remarks = 'ok';
+elseif vcomm >= 300 and vcomm < 500 then
+set remarks = 'good';
+else
+set remarks = 'excellent';
+end if;
+select remarks;
+end //
+delimiter ;
+
+
+call get_Remarks(7902,@a);
+select @a;
+
+
+
+delimiter //
+create procedure Net_Sal1(in pempno int,out remarks varchar(20), out pSalComm double(9,2))
+begin
+select sal+ifnull(comm,0) "net salary" into pSalComm from emp where empno=pempno;
+if pSalComm<1000 then
+set remarks='less';
+elseif pSalComm>=1000 and pSalComm<=2000 then
+set remarks='ok';
+elseif pSalComm>=2000 and pSalComm<=3000 then
+set remarks='good';
+else
+set remarks='excellent';
+end if;
+select remarks;
+end //
+delimiter ;
+
+call Net_Sal1(7902,@a,@b);
+select @a,@b;
+
+
+
+
+delimiter //
+create procedure Get_Disc2(in ppid int,out discper double(9,2), out discamt double(9,2))
+begin
+declare vprice int;
+select price into vprice from product where ppid=pid;
+if vprice < 20 then 
+set discper=0.03 and discamt=vprice*0.97;
+elseif vprice >=20 and vprice < 40 then 
+set discper=0.07 and discamt=vprice*0.93;
+else
+set discper=0.10 and discamt=vprice*0.90;
+end if;
+select discper,discamt;
+end //
+delimiter ;
+
+call Get_Disc2(1,@a,@b);
+select @a,@b;
+
+
+delimiter //
+create procedure disc_get(in ppid int,out discper double(9,2), out discamt double(9,2))
+begin
+declare vprice double(9,2);
+select price into vprice from product where ppid=pid;
+if vprice<20 then
+set discper=0.03;
+elseif vprice>=20 and vprice<40 then
+set discper=0.07;
+else
+set discper=0.10;
+end if;
+set discamt=vprice-vprice*discper;
+select vprice,discamt,discper;
+end //
+delimiter ;
+
+call disc_get(10,@a,@b);
+select @a,@b;
+
+
+
+									looping
+
+
+delimiter //
+create procedure disp_Data(in start int,in stop int)
+begin
+declare count int default start;
+declare str varchar(100) default '';
+while count<=stop
+do
+set str=concat(str,count,',');
+set count=count+1;
+end while;
+set str=substr(str,1,length(str)-1);
+select str;
+end //
+delimiter ;
+
+
+call disp_Data(10,20);
+
+
+
+delimiter //
+create procedure factorial(in num int)
+begin
+declare i int default 1;
+declare fact int default 1;
+while i<=num
+do
+set fact=fact*i;
+set i=i+1;
+end while;
+select fact;
+end //
+delimiter ;
+
+call factorial(5);
+
+
+
+									triggers
+									
+									
+create table empSecurity(
+empno int,
+ename varchar(20),
+action varchar(20),
+oldsal double(9,2),
+newsal double(9,2),
+uname varchar(20),
+act_date date);
+
+delimiter //
+create trigger emp_update before update on emp
+for each row
+begin
+insert into empSecurity values(old.empno,old.ename,'update',old.sal,new.sal,user(),curdate());
+end //
+delimiter ;
+
+
+update emp
+set sal=2000 where ename='clerk';
+
+
+
+delimiter //
+create trigger insertemp1 after insert on emp
+for each row
+begin
+insert into empSecurity values(new.empno,new.ename,'insert',NULL,new.sal,user(),curdate());
+end //
+delimiter ;
+
+
+
+delimiter //
+create trigger deletemp after delete on emp
+for each row
+begin
+insert into empSecurity values (old.empno,old.ename,'delete',old.sal,NULL,user(),curdate());
+end //
+delimiter ;
+
+-----------------------------------------------------------------------------------------
+
+delimiter //
+create trigger emp1_Update before update on emp
+for each row
+begin
+insert into empSecurity values(OLD.empno,OLD.ename,'update',OLD.sal,NEW.sal,user(),curdate());
+end //
+delimiter ;
+
+delimiter //
+create trigger insertemp2 after insert on emp
+for each row
+begin
+insert into empSecurity values(new.empno,new.ename,'insert',null,new.sal,user(),curdate());
+end //
+delimiter ;
+
+delimiter //
+create trigger delemp after delete on emp 
+for each row
+begin
+insert into empSecurity values(old.empno,old.ename,'delete',old.sal,null,user(),curdate());
+end //
+delimiter ;
+
+
+set GLOBAL log_bin_trust_function_creators=1;
+
+
+
+delimiter //
+create function get_Email(name varchar(20),job varchar(20)) returns varchar(50)
+begin
+set email=concat(substr(ename,1,3),'.',substr(job,1,3),'@xyz.com');
+return email;
+end //
+delimiter ;
+
+select empno,ename,job,get_Email(ename.job) email from emp;
+
+
+												Cursors
+
+
+delimiter //
+create procedure procur()
+begin
+declare finished int default 0;
+declare vempno,vmgr,vdeptno int;
+declare vename,vjob varchar(30);
+declare vhiredate date;
+declare vsal,vcomm double(9,2);
+declare emp_cursor Cursor for select * from emp;
+declare continue handler for not found set finished=1;
+open emp_cursor;
+l1:loop
+fetch emp_cursor into vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+if finished=1 then
+leave l1;
+end if;
+select vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+end loop;
+close emp_cursor;
+end //
+delimiter ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+delimiter //
+create procedure display_Emp()
+begin
+declare finished int default 0;
+declare vempno,vmgr,vdeptno int;
+declare vename,vjob varchar(20);
+declare vhiredate date;
+declare vsal,vcomm double(9,2);
+declare emp_Cur cursor for select * from emp;
+declare continue handler for not found set finished = 1;
+open emp_Cur;
+l1:loop
+fetch emp_Cur into vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+if finished=1 then
+leave l1;
+end if;
+select vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+end loop;
+close emp_Cur;
+end //
+delimiter ;
+
+
+call display_Emp();
+
+
+delimiter //
+create procedure Update_Sal1(out pmgrcnt int,out panacnt int,out pclrcnt int,out pothcnt int)
+begin 
+declare finished int default 0;
+declare vempno,vmgr,vdeptno int;
+declare vename,vjob varchar(20);
+declare vhiredate date;
+declare vsal,vcomm,vupdsal double(9,2);
+declare emp_Cur cursor for select * from emp;
+declare continue handler for not found set finished = 1;
+set pmgrcnt=0;
+set pothcnt=0;
+set panacnt=0;
+set pclrcnt=0;
+open emp_Cur;
+l1:loop
+fetch emp_Cur into vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+if finished=1 then
+leave l1;
+end if;
+if vjob='manager' then
+set vupdsal=1.1*vsal;
+update emp
+set sal=1.1*sal
+where empno=vempno;
+set pmgrcnt=pmgrcnt+1;
+elseif vjob='analyst' then
+set vupdsal=1.2*vsal;
+update emp 
+set sal=1.2*sal
+where empno=vempno;
+set panacnt=panacnt+1;
+elseif vjob='clerk' then
+set vupdsal=1.25*vsal;
+update emp
+set sal=1.25*sal
+where empno=vempno;
+set panacnt=panacnt+1;
+else
+set vupdsal=1.08*vsal;
+update emp
+set sal=1.08*sal
+where empno=vempno;
+set pothcnt=pothcnt+1;
+end if;
+select vempno,vename,vjob,vmgr,vhiredate,vsal,vcomm,vdeptno;
+end loop;
+select pmgrcnt,panacnt,pclrcnt,pothcnt;
+close emp_Cur;
+end //
+delimiter ;
+
+call Update_Sal(@a,@b,@c,@d);
+
+
+
+delimiter //
+create procedure gen_email()
+begin
+declare str varchar(1000) default'';
+declare vename,vjob,vemail varchar(50);
+declare finished int default 0;
+declare emp_cur Cursor for select ename,job from emp;
+declare continue handler for not found set finished = 1;
+open emp_cur;
+l1:loop
+fetch emp_cur into vename,vjob;
+if finished=1 then
+leave l1;
+end if;
+if vjob is not null then
+set str=concat(substr(vename,1,3),'.',substr(vjob,1,3),'@mycompany.com');
+end if;
+select str;
+end loop;
+close emp_cur;
+end //
+delimiter ;
+
+
+
+
+
+delimiter //
+create function email_get (name varchar(20),job varchar(20)) returns varchar(50)
+begin
+declare email varchar(100);
+set email=concat(substr(name,1,3),'.',substr(job,1,3),'@xyz.com');
+return email;
+end //
+delimiter ;
+
+select ename,job,email_get(ename,job) from emp;
+
+
+delimiter //
+create function exper(hdate date) returns int
+begin
+declare exp int;
+set exp=floor(datediff(curdate(),hdate)/365);
+return exp;
+end //
+delimiter ;
+
+select empno,hiredate,exper(hiredate) from emp;
