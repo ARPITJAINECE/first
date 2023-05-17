@@ -1,8 +1,6 @@
 prompt 233015_arpitjain d/
 
 
-
-
 select emono,ename,sal,e.deptno,d.deptno,dname from emp e right join dept d on e.deptno=d.deptno;
 
 select empno,ename,sal,e.deptno,d.deptno,dname from emp e left join dept d on e.deptno=d.deptno
